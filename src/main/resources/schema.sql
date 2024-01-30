@@ -14,3 +14,8 @@ CREATE TABLE IF NOT EXISTS salary (
     emp_id VARCHAR(30),
     CONSTRAINT fk_emp FOREIGN KEY (emp_id) REFERENCES employee(emp_id)
 );
+CREATE TABLE IF NOT EXISTS `user` (
+    user_id INT PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(100) NOT NULL ,
+    password VARCHAR(200) NOT NULL
+);
