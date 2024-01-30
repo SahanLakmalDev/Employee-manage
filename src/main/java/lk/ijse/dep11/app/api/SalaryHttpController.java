@@ -39,7 +39,7 @@ public class SalaryHttpController {
             }
             // Retrieve salary details for the specified employee and year
             List<SalaryTO> salaryDetails = new ArrayList<>();
-            String getSalaryDetailsQuery = "SELECT salary_id, year, month, salary, create_date_time FROM salary WHERE emp_id = ? AND year = ?";
+            String getSalaryDetailsQuery = "SELECT salary_id, year, month, salary, create_date_time, emp_id FROM salary WHERE emp_id = ? AND year = ?";
             try (PreparedStatement preparedStatement = connection.prepareStatement(getSalaryDetailsQuery)) {
                 preparedStatement.setString(1, empId);
                 preparedStatement.setInt(2, year);
@@ -52,6 +52,7 @@ public class SalaryHttpController {
                         salaryTO.setMonth(resultSet.getString("month"));
                         salaryTO.setSalary(resultSet.getBigDecimal("salary"));
                         salaryTO.setCreatedDataTime(resultSet.getTimestamp("create_date_time").toLocalDateTime());
+                        salaryTO.setEmpId(resultSet.getString("emp_id"));
 
                         salaryDetails.add(salaryTO);
                     }
