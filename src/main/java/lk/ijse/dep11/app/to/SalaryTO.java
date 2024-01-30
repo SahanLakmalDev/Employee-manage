@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import javax.validation.constraints.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 @Data
@@ -25,7 +26,7 @@ public class SalaryTO implements Serializable {
     @DecimalMin(value = "0.00", inclusive = false, message = "Salary must be greater than 0.00")
     private BigDecimal salary;
     @NotNull(message = "Create Date Time is required")
-    private LocalDateTime createdDataTime;
+    private Timestamp createdDataTime;
     @NotBlank(message = "Employee ID is required")
     @Pattern(regexp = "^E\\d+", message = "Invalid format")
     private String empId;

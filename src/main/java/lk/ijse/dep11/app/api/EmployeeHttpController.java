@@ -98,7 +98,7 @@ public class EmployeeHttpController {
             }
 
         }catch (SQLException e) {
-            e.printStackTrace(); // Handle the exception according to your needs
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
@@ -164,7 +164,7 @@ public class EmployeeHttpController {
         try (Connection connection = pool.getConnection()) {
             List<EmployeeTO> employees = new ArrayList<>();
 
-            String getAllEmployeesQuery = "SELECT emp_id, name, contact, address, status FROM employee";
+            String getAllEmployeesQuery = "SELECT emp_id, name, contact, address, status FROM employee ORDER BY emp_id";
             try (PreparedStatement preparedStatement = connection.prepareStatement(getAllEmployeesQuery)) {
                 try (ResultSet resultSet = preparedStatement.executeQuery()) {
                     while (resultSet.next()) {
@@ -187,6 +187,38 @@ public class EmployeeHttpController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
+    //Get All employees by page wise
+//    @GetMapping(produces = "application/json")
+//    public ResponseEntity<List<EmployeeTO>> getAllPaginatedEmployees(
+//            @RequestParam(defaultValue = "1") int page,
+//            @RequestParam(defaultValue = "10") int pageSize
+//    ) throws SQLException {
+//        // Calculate the offset based on page and pageSize
+//        int offset = (page - 1) * pageSize;
+//
+//        try(Connection connection = pool.getConnection()){
+//
+//            List<EmployeeTO> employees = new ArrayList<>();
+//            String getAllEmployeesQuery = "SELECT emp_id, name, contact, address, status FROM employee LIMIT ? OFFSET ?";
+//            try (PreparedStatement preparedStatement =connection.prepareStatement(getAllEmployeesQuery)) {
+//                preparedStatement.setInt(1, pageSize);
+//                preparedStatement.setInt(2, offset);
+//
+//                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+//                    while (resultSet.next()) {
+//                        // Same code to populate employees
+//                    }
+//                }
+//            }
+//            return ResponseEntity.status(HttpStatus.OK).body(employees);
+//        }catch (SQLException e) {
+//            e.printStackTrace();
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+//        }
+//
+//
+//    }
 
     //Get all the active employees API
     @GetMapping(value = "/active", produces = "application/json")

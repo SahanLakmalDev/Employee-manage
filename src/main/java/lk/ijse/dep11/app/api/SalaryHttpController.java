@@ -33,7 +33,7 @@ public class SalaryHttpController {
     public ResponseEntity<List<SalaryTO>> getSalaryDetailsByEmployeeAndYear(@PathVariable String empId, @RequestParam int year) throws SQLException {
         try(Connection connection = pool.getConnection()){
 
-            // Check if the employee with the specified empId exists
+//             Check if the employee with the specified empId exists
             if(!employeeExists(connection, empId)){
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // Employee not found
             }
@@ -51,7 +51,7 @@ public class SalaryHttpController {
                         salaryTO.setYear(resultSet.getString("year"));
                         salaryTO.setMonth(resultSet.getString("month"));
                         salaryTO.setSalary(resultSet.getBigDecimal("salary"));
-                        salaryTO.setCreatedDataTime(resultSet.getTimestamp("create_date_time").toLocalDateTime());
+                        salaryTO.setCreatedDataTime(resultSet.getTimestamp("create_date_time"));
                         salaryTO.setEmpId(resultSet.getString("emp_id"));
 
                         salaryDetails.add(salaryTO);
@@ -68,7 +68,7 @@ public class SalaryHttpController {
 
     }
     private boolean employeeExists(Connection connection, String empId) throws SQLException {
-        String query = "SELECT emp_id FROM salary WHERE emp_id = ?";
+        String query = "SELECT emp_id FROM employee WHERE emp_id = ?";
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, empId);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
@@ -79,7 +79,7 @@ public class SalaryHttpController {
 
     //Make salary payment transaction API
     @PostMapping(value = "/make-payment", consumes = "application/json", produces = "application/json")
-    public ResponseEntity<Void> makeSalaryPayment(@RequestBody SalaryTO salaryTO) {
+    public ResponseEntity<String> makeSalaryPayment(@RequestBody SalaryTO salaryTO) {
         Connection connection = null;
         try {
             connection = pool.getConnection();
@@ -90,6 +90,10 @@ public class SalaryHttpController {
             // Check if the employee with the specified empId exists
             if (!employeeExists(connection, salaryTO.getEmpId())) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // Employee not found
+            }
+            // Check if the employee is active
+            if (!isEmployeeActive(connection, salaryTO.getEmpId())) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Cannot make payment for a deactivated employee.");
             }
 
             // Check if the salary payment for the specified employee, year, and month already exists
@@ -146,6 +150,15 @@ public class SalaryHttpController {
         }
     }
 
+    private boolean isEmployeeActive(Connection connection, String empId) throws SQLException {
+        String query = "SELECT status FROM employee WHERE emp_id = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, empId);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                return resultSet.next() && resultSet.getBoolean("status");
+            }
+        }
+    }
     private boolean salaryPaymentExists(Connection connection, String empId, int year, String month) throws SQLException {
         String query = "SELECT COUNT(*) FROM salary WHERE emp_id = ? AND year = ? AND month = ?";
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
